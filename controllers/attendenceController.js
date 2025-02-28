@@ -83,3 +83,36 @@ export const updateEmployeeAttendance = (req, res) => {
         }
     });
 };
+
+
+export const getAttendanceStats = (req, res) => {
+  const adminId = req.user.adminId;
+  const { date } = req.query; // Get date from query params
+
+  if (!date) {
+      return res.status(400).json({ error: "Date is required" });
+  }
+
+  const query = `
+      SELECT status, COUNT(*) AS count 
+      FROM attendance 
+      WHERE emp_id IN (SELECT emp_id FROM employees WHERE admin_id = ?) 
+      AND date = ?
+      GROUP BY status;
+  `;
+
+  db.query(query, [adminId, date], (err, results) => {
+      if (err) {
+          console.error("Error fetching attendance stats:", err);
+          return res.status(500).json({ error: "Server Error" });
+      }
+
+      // Initialize stats with default values
+      const stats = { Present: 0, Absent: 0, "Half-Day": 0, Leave: 0 };
+      results.forEach(row => (stats[row.status] = row.count));
+
+      res.json(stats);
+  });
+};
+
+

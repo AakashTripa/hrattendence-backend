@@ -32,6 +32,7 @@ app.use("/api/attendance", attendenceRoute);
 
 
 
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
