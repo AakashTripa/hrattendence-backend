@@ -84,6 +84,24 @@ export const getEmployeesByAdmin = async (req, res) => {
         res.status(500).json({ message: "Server error", error });
     }
 };
-
-
-
+export const employeeCount = (req, res) => {
+    try {
+      const adminId = req.user.adminId; // Ensure adminId is correctly set from authMiddleware
+  
+      db.query(
+        "SELECT COUNT(*) AS count FROM employees WHERE admin_id = ?",
+        [adminId],
+        (error, results) => {
+          if (error) {
+            console.error("Error fetching employee count:", error);
+            return res.status(500).json({ message: "Internal server error" });
+          }
+          // results is an array of rows; count is stored in the first row's count property.
+          res.json({ count: results[0].count });
+        }
+      );
+    } catch (error) {
+      console.error("Error fetching employee count:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
