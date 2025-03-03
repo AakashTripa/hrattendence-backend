@@ -1,13 +1,16 @@
 import express from "express";
-import {  employeeCount, getEmployeesByAdmin, registerEmployee } from "../controllers/employeeController.js";
+import {  activateEmployee, deactivateEmployee, employeeCount, getDeactivatedEmployees, getEmployeesByAdmin, registerEmployee } from "../controllers/employeeController.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 // Protect employee registration with token verification
 router.post("/register", verifyToken, registerEmployee);
-
 router.get("/", verifyToken, getEmployeesByAdmin);
 router.get("/count", verifyToken, employeeCount);
+router.get("/deactivated", verifyToken, getDeactivatedEmployees);
+router.put("/deactivate/:emp_id", verifyToken, deactivateEmployee);
+router.put("/activate/:emp_id", verifyToken, activateEmployee);
+
 
 export default router;
