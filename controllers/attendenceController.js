@@ -144,31 +144,35 @@ export const getAttendanceStats = (req, res) => {
 
 
 export const getEmployeeAttendance = function (req, res) {
-    const emp_id = req.params.emp_id;
-    const { date } = req.query; // Get date from query parameter
+  const emp_id = req.params.emp_id;
+  const { month, year } = req.query; // Get month and year from query parameters
 
-    let query = "SELECT id, date, status, entry_time, exit_time FROM attendance WHERE emp_id = ?";
-    let values = [emp_id];
+  let query = `
+      SELECT id, date, status, entry_time, exit_time 
+      FROM attendance 
+      WHERE emp_id = ? 
+  `;
+  let values = [emp_id];
 
-    if (date) {
-        query += " AND date = ?";
-        values.push(date);
-    }
+  if (month && year) {
+      query += " AND MONTH(date) = ? AND YEAR(date) = ?";
+      values.push(month, year);
+  }
 
-    query += " ORDER BY date DESC";
+  query += " ORDER BY date DESC";
 
-    db.query(query, values, function (error, results) {
-        if (error) {
-            console.error("Error fetching attendance:", error);
-            res.status(500).json({ error: "Server error" });
-            return;
-        }
+  db.query(query, values, function (error, results) {
+      if (error) {
+          console.error("Error fetching attendance:", error);
+          res.status(500).json({ error: "Server error" });
+          return;
+      }
 
-        if (results.length === 0) {
-            res.status(404).json({ message: "No attendance records found." });
-            return;
-        }
+      if (results.length === 0) {
+          res.status(404).json({ message: "No attendance records found for this month." });
+          return;
+      }
 
-        res.json(results);
-    });
+      res.json(results);
+  });
 };
