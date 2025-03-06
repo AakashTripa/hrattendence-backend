@@ -186,3 +186,122 @@ export const activateEmployee = (req, res) => {
         res.json({ message: "Employee activated successfully" });
     });
 };
+
+export const getEmployeeDetails =  async (req, res) => {
+    try {
+        const { emp_id } = req.params;
+        const admin_id = req.user.admin_id || req.user.adminId; // Ensure the admin can only see their employees
+
+        if (!emp_id) {
+            return res.status(400).json({ error: "Employee ID is required" });
+        }
+
+        const sql = "SELECT * FROM employees WHERE emp_id = ? AND admin_id = ?";
+        
+        db.query(sql, [emp_id, admin_id], (err, result) => {
+            if (err) {
+                console.error("Database Query Error:", err);
+                return res.status(500).json({ error: "Failed to fetch employee details" });
+            }
+
+            if (result.length === 0) {
+                return res.status(404).json({ error: "Employee not found" });
+            }
+
+            res.json(result[0]); // Send employee data as a response
+        });
+    } catch (error) {
+        console.error("Error in getEmployeeById:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+
+
+export const updateEmployeeDetails = (req, res) => {
+    const { emp_id } = req.params;
+    const admin_id = req.user.admin_id || req.user.adminId;
+    const updatedData = req.body;
+
+    if (!admin_id) {
+        return res.status(400).json({ error: "Admin ID is missing" });
+    }
+
+    // First, fetch the existing employee details
+    const selectSql = "SELECT * FROM employees WHERE emp_id = ? AND admin_id = ?";
+    db.query(selectSql, [emp_id, admin_id], (err, results) => {
+        if (err) {
+            console.error("Fetch Employee Error:", err);
+            return res.status(500).json({ error: "Failed to fetch employee details" });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Employee not found or unauthorized update" });
+        }
+
+        // Merge existing data with updated fields
+        const existingEmployee = results[0];
+        const mergedData = {
+            name: updatedData.name || existingEmployee.name,
+            last_name: updatedData.last_name || existingEmployee.last_name,
+            email: updatedData.email || existingEmployee.email,
+            phone: updatedData.phone || existingEmployee.phone,
+            designation: updatedData.designation || existingEmployee.designation,
+            join_date: updatedData.join_date || existingEmployee.join_date,
+            office_id: updatedData.office_id || existingEmployee.office_id,
+            status: updatedData.status || existingEmployee.status,
+            father_name: updatedData.father_name || existingEmployee.father_name,
+            address: updatedData.address || existingEmployee.address,
+            city: updatedData.city || existingEmployee.city,
+            state: updatedData.state || existingEmployee.state,
+            postal_code: updatedData.postal_code || existingEmployee.postal_code,
+            country: updatedData.country || existingEmployee.country,
+            gender: updatedData.gender || existingEmployee.gender,
+            dob: updatedData.dob || existingEmployee.dob,
+            marital_status: updatedData.marital_status || existingEmployee.marital_status,
+            blood_group: updatedData.blood_group || existingEmployee.blood_group,
+            pan_number: updatedData.pan_number || existingEmployee.pan_number,
+            govt_registration_number: updatedData.govt_registration_number || existingEmployee.govt_registration_number,
+            pf_number: updatedData.pf_number || existingEmployee.pf_number,
+            bank_name: updatedData.bank_name || existingEmployee.bank_name,
+            ifsc_code: updatedData.ifsc_code || existingEmployee.ifsc_code,
+            account_number: updatedData.account_number || existingEmployee.account_number,
+            account_holder_name: updatedData.account_holder_name || existingEmployee.account_holder_name,
+            upi_id: updatedData.upi_id || existingEmployee.upi_id
+        };
+
+        // Now, update the employee with merged data
+        const updateSql = `
+            UPDATE employees 
+            SET name = ?, last_name = ?, email = ?, phone = ?, designation = ?, 
+                join_date = ?, office_id = ?, status = ?, 
+                father_name = ?, address = ?, city = ?, state = ?, postal_code = ?, 
+                country = ?, gender = ?, dob = ?, marital_status = ?, blood_group = ?, 
+                pan_number = ?, govt_registration_number = ?, pf_number = ?, 
+                bank_name = ?, ifsc_code = ?, account_number = ?, account_holder_name = ?, upi_id = ?
+            WHERE emp_id = ? AND admin_id = ?`;
+
+        const values = [
+            mergedData.name, mergedData.last_name, mergedData.email, mergedData.phone, mergedData.designation,
+            mergedData.join_date, mergedData.office_id, mergedData.status,
+            mergedData.father_name, mergedData.address, mergedData.city, mergedData.state, mergedData.postal_code,
+            mergedData.country, mergedData.gender, mergedData.dob, mergedData.marital_status, mergedData.blood_group,
+            mergedData.pan_number, mergedData.govt_registration_number, mergedData.pf_number,
+            mergedData.bank_name, mergedData.ifsc_code, mergedData.account_number, mergedData.account_holder_name, mergedData.upi_id,
+            emp_id, admin_id
+        ];
+
+        db.query(updateSql, values, (updateErr, result) => {
+            if (updateErr) {
+                console.error("Update Employee Error:", updateErr);
+                return res.status(500).json({ error: "Failed to update employee details" });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: "Employee not found or unauthorized update" });
+            }
+
+            res.json({ message: "Employee details updated successfully" });
+        });
+    });
+};
