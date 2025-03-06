@@ -68,3 +68,63 @@ export const updateAdminProfile = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+
+
+
+export const updatePassword = (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    const adminId = req.user.admin_id || req.user.adminId;
+
+    if (!oldPassword || !newPassword) {
+        return res.status(400).json({ message: "Both old and new passwords are required" });
+    }
+
+    try {
+        // Fetch the current hashed password from the database
+        db.query("SELECT password FROM admins WHERE admin_id = ?", [adminId], (err, results) => {
+            if (err) {
+                console.error("Error fetching password:", err);
+                return res.status(500).json({ message: "Server error" });
+            }
+
+            if (results.length === 0) {
+                return res.status(404).json({ message: "Admin not found" });
+            }
+
+            // Compare old password
+            bcrypt.compare(oldPassword, results[0].password, (err, isMatch) => {
+                if (err) {
+                    console.error("Error comparing passwords:", err);
+                    return res.status(500).json({ message: "Server error" });
+                }
+
+                if (!isMatch) {
+                    return res.status(400).json({ message: "Old password is incorrect" });
+                }
+
+                // Hash new password
+                bcrypt.hash(newPassword, 10, (err, hashedPassword) => {
+                    if (err) {
+                        console.error("Error hashing new password:", err);
+                        return res.status(500).json({ message: "Server error" });
+                    }
+
+                    // Update password in DB
+                    db.query("UPDATE admins SET password = ? WHERE admin_id = ?", [hashedPassword, adminId], (err) => {
+                        if (err) {
+                            console.error("Error updating password:", err);
+                            return res.status(500).json({ message: "Server error" });
+                        }
+
+                        return res.json({ message: "Password updated successfully" });
+                    });
+                });
+            });
+        });
+    } catch (error) {
+        console.error("Unexpected error:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+

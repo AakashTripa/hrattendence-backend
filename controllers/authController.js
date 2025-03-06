@@ -79,7 +79,7 @@ export const login = (req, res) => {
           company: admin.company_name  // ✅ Include company name in token
         }, 
         process.env.JWT_SECRET, 
-        { expiresIn: "24h" }
+        // { expiresIn: "24h" }
       );
 
       res.status(200).json({
