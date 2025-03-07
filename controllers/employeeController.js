@@ -278,7 +278,7 @@ export const updateEmployeeDetails = (req, res) => {
                 father_name = ?, address = ?, city = ?, state = ?, postal_code = ?, 
                 country = ?, gender = ?, dob = ?, marital_status = ?, blood_group = ?, 
                 pan_number = ?, govt_registration_number = ?, pf_number = ?, 
-                bank_name = ?, ifsc_code = ?, account_number = ?, account_holder_name = ?, upi_id = ?
+                bank_name = ?, ifsc_code = ?, account_number = ?, account_holder_name= ?, upi_id = ?
             WHERE emp_id = ? AND admin_id = ?`;
 
         const values = [
@@ -287,7 +287,7 @@ export const updateEmployeeDetails = (req, res) => {
             mergedData.father_name, mergedData.address, mergedData.city, mergedData.state, mergedData.postal_code,
             mergedData.country, mergedData.gender, mergedData.dob, mergedData.marital_status, mergedData.blood_group,
             mergedData.pan_number, mergedData.govt_registration_number, mergedData.pf_number,
-            mergedData.bank_name, mergedData.ifsc_code, mergedData.account_number, mergedData.account_holder_name, mergedData.upi_id,
+            mergedData.bank_name, mergedData.ifsc_code, mergedData.account_number, mergedData.account_holder_name , mergedData.upi_id,
             emp_id, admin_id
         ];
 

@@ -6,14 +6,16 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // admin signup
-export const signup = (req, res) => {
-  const { first_name, last_name, email, phone, password, company_name } = req.body;
+ // Assuming your database connection file is in config/db.js
 
-  if (!first_name || !last_name || !email || !phone || !password || !company_name) {
+export const signup = (req, res) => {
+  const { first_name, last_name, email, phone, password, company_name, country } = req.body;
+
+  if (!first_name || !last_name || !email || !phone || !password || !company_name || !country) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  // Check if the email already exists
+  // Check if email already exists
   db.query("SELECT email FROM admins WHERE email = ?", [email], (err, results) => {
     if (err) return res.status(500).json({ message: "Database error", error: err.message });
 
@@ -26,8 +28,8 @@ export const signup = (req, res) => {
       if (err) return res.status(500).json({ message: "Error hashing password" });
 
       // Insert new admin
-      const sql = "INSERT INTO admins (first_name, last_name, email, phone, password, company_name) VALUES (?, ?, ?, ?, ?, ?)";
-      db.query(sql, [first_name, last_name, email, phone, hash, company_name], (err, result) => {
+      const sql = "INSERT INTO admins (first_name, last_name, email, phone, password, company_name, country) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      db.query(sql, [first_name, last_name, email, phone, hash, company_name, country], (err, result) => {
         if (err) return res.status(500).json({ message: "Signup failed", error: err.message });
 
         res.status(201).json({ message: "Admin registered successfully" });
@@ -35,7 +37,6 @@ export const signup = (req, res) => {
     });
   });
 };
-
 
 
 
