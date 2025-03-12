@@ -5,6 +5,7 @@ import authRoutes from "./routes/authRoute.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
 import attendenceRoute from './routes/attendenceRoute.js'
 import adminRoute from './routes/adminRoute.js'
+import salaryRoute from "./routes/salaryRoute.js"
 
 import dotenv from "dotenv";
 
@@ -30,6 +31,7 @@ app.get('/',(req,res)=>{
 app.use("/api/employees", employeeRoutes);
 app.use("/api/attendance", attendenceRoute);
 app.use("/api/admins", adminRoute);
+app.use("/api",salaryRoute)
 
 
 
