@@ -13,7 +13,7 @@ export function addOrUpdateSalary(req, res) {
   
       if (result.length > 0) {
         // Employee exists, update only provided fields
-        let updateQuery = 'UPDATE salary_structure  SET ';
+        let updateQuery = 'UPDATE salary_structure SET ';
         const updateValues = [];
         
         if (base_salary !== undefined) {
