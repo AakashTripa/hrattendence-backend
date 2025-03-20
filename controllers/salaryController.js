@@ -92,3 +92,37 @@ export const getSalaryByEmpId = (req, res) => {
     });
   };
   
+
+
+  export const getEmployeeStatusAndSalary = (req, res) => {
+    const empId = req.params.empId;
+    const { month } = req.query; // Expecting format 'YYYY-MM'
+
+    const salaryQuery = `SELECT total_salary FROM salary_structure WHERE emp_id = ?`;
+    const attendanceQuery = `
+        SELECT status, DATE_FORMAT(date, '%Y-%m-%d') AS date  
+        FROM attendance 
+        WHERE emp_id = ? 
+        AND DATE_FORMAT(date, '%Y-%m') = ?`; // Ensuring correct month filter
+
+    db.query(salaryQuery, [empId], (err, salaryResults) => {
+        if (err) {
+            console.error('Error fetching salary:', err);
+            return res.status(500).json({ error: 'Failed to fetch salary data' });
+        }
+
+        db.query(attendanceQuery, [empId, month], (err, attendanceResults) => {
+            if (err) {
+                console.error('Error fetching attendance:', err);
+                return res.status(500).json({ error: 'Failed to fetch attendance data' });
+            }
+// Debugging output
+
+            res.json({
+                total_salary: salaryResults[0]?.total_salary || 0,
+                attendance: attendanceResults, // Send the actual array
+            });
+        });
+    });
+};
+
