@@ -7,6 +7,7 @@ import attendenceRoute from './routes/attendenceRoute.js'
 import adminRoute from './routes/adminRoute.js'
 import salaryRoute from "./routes/salaryRoute.js"
 import holidaysRoute from "./routes/holidaysRoute.js"
+import weekendRoute from "./routes/weekendRoute.js"
 
 import dotenv from "dotenv";
 
@@ -34,6 +35,7 @@ app.use("/api/attendance", attendenceRoute);
 app.use("/api/admins", adminRoute);
 app.use("/api",salaryRoute)
 app.use("/api/holiday",holidaysRoute)
+app.use("/api/weekends",weekendRoute)
 
 
 
