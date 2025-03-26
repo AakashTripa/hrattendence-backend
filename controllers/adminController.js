@@ -117,3 +117,61 @@ export const updatePassword = (req, res) => {
     }
 };
 
+
+export const verifyPassword = (req, res) => {
+    const { password } = req.body;
+    const adminId = req.user.admin_id || req.user.adminId;
+  
+    if (!password) {
+      return res.status(400).json({ success: false, message: 'Password is required' });
+    }
+  
+    db.query(
+      'SELECT password FROM admins WHERE admin_id = ? AND deleted = 0',
+      [adminId],
+      (err, results) => {
+        if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ success: false, message: 'Server error' });
+        }
+  
+        if (!results || results.length === 0) {
+          return res.status(404).json({ success: false, message: 'Admin not found' });
+        }
+  
+        bcrypt.compare(password, results[0].password, (err, isMatch) => {
+          if (err) {
+            console.error('Bcrypt error:', err);
+            return res.status(500).json({ success: false, message: 'Server error' });
+          }
+  
+          if (!isMatch) {
+            return res.status(401).json({ success: false, message: 'Incorrect password' });
+          }
+  
+          return res.json({ success: true, message: 'Password verified' });
+        });
+      }
+    );
+  };
+  
+  export const deactivateAccount = (req, res) => {
+    const adminId = req.user.admin_id || req.user.adminId;
+  
+    db.query(
+      'UPDATE admins SET deleted = 1 WHERE admin_id = ? AND deleted = 0',
+      [adminId],
+      (err, results) => {
+        if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ success: false, message: 'Server error' });
+        }
+  
+        if (results.affectedRows === 0) {
+          return res.status(404).json({ success: false, message: 'Admin not found' });
+        }
+  
+        return res.json({ success: true, message: 'Account deactivated successfully' });
+      }
+    );
+  };

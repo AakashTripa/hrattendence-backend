@@ -42,7 +42,6 @@ export const signup = (req, res) => {
 
 
 // Admin Login
-
 export const login = (req, res) => {
   const { email, password } = req.body;
 
@@ -50,7 +49,8 @@ export const login = (req, res) => {
     return res.status(400).json({ message: "Email and password are required" });
   }
 
-  const sql = "SELECT admin_id, first_name, last_name, company_name, password FROM admins WHERE email = ?";
+  // Update SQL query to include the deleted column
+  const sql = "SELECT admin_id, first_name, last_name, company_name, password, deleted FROM admins WHERE email = ?";
   
   db.query(sql, [email], (err, results) => {
     if (err) {
@@ -63,6 +63,13 @@ export const login = (req, res) => {
 
     const admin = results[0];
 
+    // Check if account is deactivated
+    if (admin.deleted === 1) {
+      return res.status(403).json({ 
+        message: "Account deactivated. Please contact support to reactivate."
+      });
+    }
+
     bcrypt.compare(password, admin.password, (err, isMatch) => {
       if (err) {
         return res.status(500).json({ message: "Error comparing passwords" });
@@ -72,12 +79,11 @@ export const login = (req, res) => {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
-      // ✅ Fix the token payload with correct field names
       const token = jwt.sign(
         { 
           adminId: admin.admin_id, 
           name: `${admin.first_name} ${admin.last_name}`,
-          company: admin.company_name  // ✅ Include company name in token
+          company: admin.company_name
         }, 
         process.env.JWT_SECRET, 
         // { expiresIn: "24h" }
@@ -88,7 +94,7 @@ export const login = (req, res) => {
         token,
         adminId: admin.admin_id,
         name: `${admin.first_name} ${admin.last_name}`,
-        company: admin.company_name,  // ✅ Send company name to frontend
+        company: admin.company_name,
       });
     });
   });
